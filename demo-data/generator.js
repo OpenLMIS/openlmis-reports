@@ -10,14 +10,7 @@ var query = "INSERT INTO %s (SELECT * FROM json_populate_recordset(NULL::%s, '%s
 // This presents the order that must be kept for proper data insertion.
 // Tables not included here are populated in random order
 var filesOrdered = [
-    "requisition.requisition_group_program_schedules",
-    "requisition.requisition_template_columns",
-    "requisition.requisition_templates",
-    "requisition.requisitions",
-    "requisition.columns_maps",
-    "requisition.requisition_line_items",
-    "requisition.jasper_templates",
-    "requisition.template_parameters"
+    "report.jasper_templates"
 ]
 
 // Detects if the given key/value pair represents a foreign key.
