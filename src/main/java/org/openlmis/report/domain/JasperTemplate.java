@@ -25,7 +25,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.persistence.CascadeType;
@@ -34,6 +36,9 @@ import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
@@ -81,6 +86,14 @@ public class JasperTemplate extends BaseEntity {
   @Getter
   @Setter
   private List<JasperTemplateParameter> templateParameters;
+
+  @ManyToMany(fetch = FetchType.EAGER)
+  @JoinTable(name = "jasper_templates_report_images",
+      joinColumns = @JoinColumn(name = "jaspertemplateid", nullable = false),
+      inverseJoinColumns = @JoinColumn(name = "reportimageid", nullable = false))
+  @Getter
+  @Setter
+  private Set<ReportImage> reportImages = new HashSet<>();
 
   /**
    * Export this object to the specified exporter (DTO).

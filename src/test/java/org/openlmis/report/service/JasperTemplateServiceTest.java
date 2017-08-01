@@ -32,10 +32,14 @@ import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.openlmis.report.domain.JasperTemplate;
 import org.openlmis.report.domain.JasperTemplateParameter;
+import org.openlmis.report.domain.ReportImage;
 import org.openlmis.report.dto.external.RightDto;
+import org.openlmis.report.exception.JasperReportViewException;
 import org.openlmis.report.exception.ReportingException;
 import org.openlmis.report.exception.ValidationMessageException;
+import org.openlmis.report.i18n.ReportImageMessageKeys;
 import org.openlmis.report.repository.JasperTemplateRepository;
+import org.openlmis.report.repository.ReportImageRepository;
 import org.openlmis.report.service.referencedata.RightReferenceDataService;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -43,19 +47,25 @@ import org.powermock.modules.junit4.PowerMockRunnerDelegate;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
+import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
 
+import static java.awt.image.BufferedImage.TYPE_INT_RGB;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.arrayContaining;
 import static org.hamcrest.Matchers.contains;
@@ -96,6 +106,9 @@ public class JasperTemplateServiceTest {
   @Mock
   private RightReferenceDataService rightReferenceDataService;
 
+  @Mock
+  private ReportImageRepository reportImageRepository;
+
   @InjectMocks
   private JasperTemplateService jasperTemplateService;
 
@@ -110,6 +123,7 @@ public class JasperTemplateServiceTest {
   private static final String PARAM2 = "param2";
   private static final String PARAM3 = "param3";
   private static final String PARAM4 = "param4";
+  private static final String IMAGE_NAME = "image";
   
   private HttpServletRequest request;
   private JasperTemplate template;
@@ -235,6 +249,38 @@ public class JasperTemplateServiceTest {
   }
 
   @Test
+  public void shouldThrowErrorIfImageDoesNotExist() throws Exception {
+    expectedException.expect(ReportingException.class);
+    expectedException.expectMessage(ReportImageMessageKeys.ERROR_NOT_FOUND_WITH_NAME);
+
+    MultipartFile file = mock(MultipartFile.class);
+    when(file.getOriginalFilename()).thenReturn(NAME_OF_FILE);
+
+    mockStatic(JasperCompileManager.class);
+    JasperReport report = mock(JasperReport.class);
+    InputStream inputStream = mock(InputStream.class);
+    when(file.getInputStream()).thenReturn(inputStream);
+
+    JRParameter param1 = mock(JRParameter.class);
+
+    when(report.getParameters()).thenReturn(new JRParameter[]{param1});
+    when(JasperCompileManager.compileReport(inputStream)).thenReturn(report);
+
+    when(param1.isForPrompting()).thenReturn(false);
+    when(param1.isSystemDefined()).thenReturn(false);
+    when(param1.getName()).thenReturn(IMAGE_NAME);
+    when(param1.getValueClassName()).thenReturn("java.awt.Image");
+
+    when(reportImageRepository.findByName(IMAGE_NAME)).thenReturn(null);
+
+    JasperTemplate jasperTemplate = new JasperTemplate();
+
+    jasperTemplateService.validateFileAndInsertTemplate(jasperTemplate, file);
+
+    verify(jasperTemplateService, never()).saveWithParameters(jasperTemplate);
+  }
+
+  @Test
   public void shouldThrowErrorIfDisplayNameOfParameterIsMissing() throws Exception {
     expectedException.expect(ReportingException.class);
     expectedException.expect(hasProperty("params", arrayContaining("displayName")));
@@ -280,11 +326,12 @@ public class JasperTemplateServiceTest {
 
     JRParameter param1 = mock(JRParameter.class);
     JRParameter param2 = mock(JRParameter.class);
+    JRParameter param3 = mock(JRParameter.class);
     JRPropertiesMap propertiesMap = mock(JRPropertiesMap.class);
     JRExpression jrExpression = mock(JRExpression.class);
 
     String[] propertyNames = {DISPLAY_NAME};
-    when(report.getParameters()).thenReturn(new JRParameter[]{param1, param2});
+    when(report.getParameters()).thenReturn(new JRParameter[]{param1, param2, param3});
     when(report.getProperty(REPORT_TYPE_PROPERTY)).thenReturn("test type");
     when(JasperCompileManager.compileReport(inputStream)).thenReturn(report);
     when(propertiesMap.getPropertyNames()).thenReturn(propertyNames);
@@ -306,6 +353,13 @@ public class JasperTemplateServiceTest {
     when(param2.isForPrompting()).thenReturn(true);
     when(param2.getDescription()).thenReturn("desc");
     when(param2.getDefaultValueExpression()).thenReturn(jrExpression);
+
+    when(param3.getValueClassName()).thenReturn("java.awt.Image");
+    when(param3.isForPrompting()).thenReturn(false);
+    when(param3.isSystemDefined()).thenReturn(false);
+    when(param3.getName()).thenReturn(IMAGE_NAME);
+    ReportImage reportImage = mock(ReportImage.class);
+    when(reportImageRepository.findByName(IMAGE_NAME)).thenReturn(reportImage);
 
     ByteArrayOutputStream byteOutputStream = mock(ByteArrayOutputStream.class);
     whenNew(ByteArrayOutputStream.class).withAnyArguments().thenReturn(byteOutputStream);
@@ -329,6 +383,8 @@ public class JasperTemplateServiceTest {
     assertThat(jasperTemplate.getTemplateParameters().get(0).getRequired(), is(true));
     assertThat(jasperTemplate.getTemplateParameters().get(0).getOptions(), contains("option 1",
             "opt,ion 2"));
+    assertEquals(1, jasperTemplate.getReportImages().size());
+    assertTrue(jasperTemplate.getReportImages().contains(reportImage));
   }
 
   @Test
@@ -479,5 +535,49 @@ public class JasperTemplateServiceTest {
         template);
 
     assertThat(resultMap.size(), is(0));
+  }
+
+
+  @Test
+  public void mapReportImagesToTemplateShouldReturnEmptyMapIfNoImages()
+      throws JasperReportViewException {
+    when(template.getReportImages()).thenReturn(null);
+
+    Map<String, BufferedImage> resultMap = jasperTemplateService
+        .mapReportImagesToTemplate(template);
+
+    assertThat(resultMap.size(), is(0));
+  }
+
+  @Test
+  public void mapReportImagesToTemplateShouldReturnMatchingImages()
+      throws JasperReportViewException, IOException {
+    BufferedImage image = new BufferedImage(1, 1, TYPE_INT_RGB);
+    byte[] expectedData = convertImageToByteArray(image);
+
+    ReportImage reportImage = new ReportImage();
+    reportImage.setName(IMAGE_NAME);
+    reportImage.setData(expectedData);
+
+    Set<ReportImage> images = new HashSet<>();
+    images.add(reportImage);
+
+    when(template.getReportImages()).thenReturn(images);
+
+    Map<String, BufferedImage> resultMap = jasperTemplateService
+        .mapReportImagesToTemplate(template);
+
+    assertThat(resultMap.size(), is(1));
+    assertTrue(resultMap.containsKey(IMAGE_NAME));
+    assertTrue(Arrays.equals(expectedData,
+        convertImageToByteArray(resultMap.get(IMAGE_NAME))));
+  }
+
+  private byte[] convertImageToByteArray(BufferedImage image) throws IOException {
+    ByteArrayOutputStream os = new ByteArrayOutputStream();
+    ImageIO.write(image, "png", os);
+    final byte[] expectedData = os.toByteArray();
+    os.close();
+    return expectedData;
   }
 }

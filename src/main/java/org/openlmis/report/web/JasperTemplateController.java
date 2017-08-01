@@ -172,8 +172,9 @@ public class JasperTemplateController extends BaseController {
     Map<String, Object> map = jasperTemplateService.mapRequestParametersToTemplate(
         request, template
     );
+    map.putAll(jasperTemplateService.mapReportImagesToTemplate(template));
+
     map.put("format", format);
-    map.put("imagesDirectory", "images/");
 
     JasperReportsMultiFormatView jasperView = jasperReportsViewService
         .getJasperReportsView(template, request);

@@ -13,8 +13,15 @@ schemas:
 
   - configurationSetting: !include schemas/configurationSetting.json
 
-  - jasperTemplateDto: !include schemas/jasperTemplateDto.json
+  - reportImage: !include schemas/reportImage.json
 
+  - reportImageArray: |
+      {
+          "type": "array",
+          "items": { "type": "object", "$ref": "schemas/reportImage.json" }
+      }
+
+  - jasperTemplateDto: !include schemas/jasperTemplateDto.json
 
   - jasperTemplateDtoArray: |
       {
@@ -318,6 +325,78 @@ resourceTypes:
                               body:
                                 application/json:
                                     schema: localizedMessage
+      /images:
+          displayName: Report Image
+          post:
+              is: [ secured ]
+              description: Create or update report image.
+              body:
+                  multipart/form-data:
+                    formParameters:
+                        file:
+                             displayName: JPG, PNG or GIF file.
+                             type: file
+                             required: false
+                             repeat: false
+                        name:
+                             displayName: Name of Image in database
+                             type: string
+                             required: false
+                             repeat: false
+              responses:
+                    200:
+                    403:
+                        body:
+                          application/json:
+                            schema: localizedMessage
+          get:
+              is: [ secured ]
+              description: Get all images.
+              responses:
+                  200:
+                      body:
+                        application/json:
+                          schema: reportImageArray
+                  403:
+                      body:
+                        application/json:
+                            schema: localizedMessage
+          /{id}:
+              uriParameters:
+                  id:
+                      displayName: id
+                      type: string
+                      required: true
+                      repeat: false
+              delete:
+                  is: [ secured ]
+                  description: Delete chosen image.
+                  responses:
+                      204:
+                      403:
+                          body:
+                            application/json:
+                                schema: localizedMessage
+                      404:
+                          body:
+                            application/json:
+                              schema: localizedMessage
+              get:
+                  is: [ secured ]
+                  description: Get chosen image.
+                  responses:
+                      200:
+                          body:
+                            application/json:
+                              schema: reportImage
+                      403:
+                          body:
+                            application/json:
+                                schema: localizedMessage
+                      404:
+                          body:
+                            application/json:
+                                schema: localizedMessage
 
   /settings:
       displayName: Settings.

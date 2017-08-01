@@ -23,34 +23,43 @@ import net.sf.jasperreports.engine.JasperReport;
 import org.openlmis.report.domain.JasperTemplate;
 import org.openlmis.report.domain.JasperTemplateParameter;
 import org.openlmis.report.domain.JasperTemplateParameterDependency;
+import org.openlmis.report.domain.ReportImage;
+import org.openlmis.report.exception.JasperReportViewException;
 import org.openlmis.report.exception.ReportingException;
 import org.openlmis.report.exception.ValidationMessageException;
+import org.openlmis.report.i18n.ReportImageMessageKeys;
 import org.openlmis.report.repository.JasperTemplateRepository;
+import org.openlmis.report.repository.ReportImageRepository;
 import org.openlmis.report.service.referencedata.RightReferenceDataService;
 import org.openlmis.report.utils.Message;
+import org.openlmis.report.utils.ReportingValidationHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.awt.Image;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.openlmis.report.i18n.AuthorizationMessageKeys.ERROR_RIGHT_NOT_FOUND;
-import static org.openlmis.report.i18n.ReportingMessageKeys.ERROR_REPORTING_FILE_EMPTY;
-import static org.openlmis.report.i18n.ReportingMessageKeys.ERROR_REPORTING_FILE_INCORRECT_TYPE;
 import static org.openlmis.report.i18n.ReportingMessageKeys.ERROR_REPORTING_FILE_INVALID;
-import static org.openlmis.report.i18n.ReportingMessageKeys.ERROR_REPORTING_FILE_MISSING;
 import static org.openlmis.report.i18n.ReportingMessageKeys.ERROR_REPORTING_IO;
 import static org.openlmis.report.i18n.ReportingMessageKeys.ERROR_REPORTING_PARAMETER_INCORRECT_TYPE;
 import static org.openlmis.report.i18n.ReportingMessageKeys.ERROR_REPORTING_PARAMETER_MISSING;
@@ -61,12 +70,16 @@ import static org.openlmis.report.i18n.ReportingMessageKeys.ERROR_REPORTING_TEMP
 public class JasperTemplateService {
   static final String REPORT_TYPE_PROPERTY = "reportType";
   private static final String DEFAULT_REPORT_TYPE = "Consistency Report";
+  private static final String[] ALLOWED_FILETYPES = {"jrxml"};
 
   @Autowired
   private JasperTemplateRepository jasperTemplateRepository;
 
   @Autowired
   private RightReferenceDataService rightReferenceDataService;
+
+  @Autowired
+  private ReportImageRepository reportImageRepository;
 
   /**
    * Saves a template with given name.
@@ -109,7 +122,7 @@ public class JasperTemplateService {
    * @return Map of matching parameters, empty Map if none match
    */
   public Map<String, Object> mapRequestParametersToTemplate(
-      HttpServletRequest request,JasperTemplate template) {
+      HttpServletRequest request, JasperTemplate template) {
     List<JasperTemplateParameter> templateParameters = template.getTemplateParameters();
     if (templateParameters == null) {
       return new HashMap<>();
@@ -138,6 +151,31 @@ public class JasperTemplateService {
       }
     }
 
+    return map;
+  }
+
+  /**
+   * Map report images to the template parameters in the template. If there are no template
+   * parameters that are associated with images, returns an empty Map.
+   *
+   * @param template template with parameters
+   * @return Map of matching parameters, empty Map if none match
+   */
+  public Map<String, BufferedImage> mapReportImagesToTemplate(JasperTemplate template)
+      throws JasperReportViewException {
+    Set<ReportImage> images = template.getReportImages();
+    if (images == null) {
+      return new HashMap<>();
+    }
+    Map<String, BufferedImage> map = new HashMap<>();
+    for (ReportImage image : images) {
+      try {
+        InputStream inputStream = new ByteArrayInputStream(image.getData());
+        map.put(image.getName(), ImageIO.read(inputStream));
+      } catch (IOException ex) {
+        throw new JasperReportViewException(ex, ERROR_REPORTING_IO, ex.getMessage());
+      }
+    }
     return map;
   }
 
@@ -181,9 +219,9 @@ public class JasperTemplateService {
    */
   private void validateFileAndSetData(JasperTemplate jasperTemplate, MultipartFile file)
       throws ReportingException {
-    throwIfFileIsNull(file);
-    throwIfIncorrectFileType(file);
-    throwIfFileIsEmpty(file);
+    ReportingValidationHelper.throwIfFileIsNull(file);
+    ReportingValidationHelper.throwIfIncorrectFileType(file, ALLOWED_FILETYPES);
+    ReportingValidationHelper.throwIfFileIsEmpty(file);
 
     try {
       JasperReport report = JasperCompileManager.compileReport(file.getInputStream());
@@ -196,7 +234,7 @@ public class JasperTemplateService {
       JRParameter[] jrParameters = report.getParameters();
 
       if (jrParameters != null && jrParameters.length > 0) {
-        setTemplateParameters(jasperTemplate, jrParameters);
+        processJrParameters(jasperTemplate, jrParameters);
       }
 
       ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -210,19 +248,30 @@ public class JasperTemplateService {
     }
   }
 
-  private void setTemplateParameters(JasperTemplate jasperTemplate, JRParameter[] jrParameters)
+  private void processJrParameters(JasperTemplate jasperTemplate, JRParameter[] jrParameters)
       throws ReportingException {
     ArrayList<JasperTemplateParameter> parameters = new ArrayList<>();
+    Set<ReportImage> images = new HashSet<>();
 
     for (JRParameter jrParameter : jrParameters) {
-      if (!jrParameter.isSystemDefined() && jrParameter.isForPrompting()) {
-        JasperTemplateParameter jasperTemplateParameter = createParameter(jrParameter);
-        jasperTemplateParameter.setTemplate(jasperTemplate);
-        parameters.add(jasperTemplateParameter);
+      if (!jrParameter.isSystemDefined()) {
+        if (jrParameter.isForPrompting()) {
+          JasperTemplateParameter jasperTemplateParameter = createParameter(jrParameter);
+          jasperTemplateParameter.setTemplate(jasperTemplate);
+          parameters.add(jasperTemplateParameter);
+        } else if (Image.class.getName().equals(jrParameter.getValueClassName())) {
+          String name = jrParameter.getName();
+          ReportImage reportImage = reportImageRepository.findByName(name);
+          if (reportImage == null) {
+            throw new ReportingException(ReportImageMessageKeys.ERROR_NOT_FOUND_WITH_NAME, name);
+          }
+          images.add(reportImage);
+        }
       }
     }
 
     jasperTemplate.setTemplateParameters(parameters);
+    jasperTemplate.setReportImages(images);
   }
 
   /**
@@ -279,24 +328,6 @@ public class JasperTemplateService {
   private void throwIfTemplateWithSameNameAlreadyExists(String name) throws ReportingException {
     if (jasperTemplateRepository.findByName(name) != null) {
       throw new ReportingException(ERROR_REPORTING_TEMPLATE_EXIST);
-    }
-  }
-
-  private void throwIfFileIsEmpty(MultipartFile file) throws ReportingException {
-    if (file.isEmpty()) {
-      throw new ReportingException(ERROR_REPORTING_FILE_EMPTY);
-    }
-  }
-
-  private void throwIfIncorrectFileType(MultipartFile file) throws ReportingException {
-    if (!file.getOriginalFilename().endsWith(".jrxml")) {
-      throw new ReportingException(ERROR_REPORTING_FILE_INCORRECT_TYPE);
-    }
-  }
-
-  private void throwIfFileIsNull(MultipartFile file) throws ReportingException {
-    if (file == null) {
-      throw new ReportingException(ERROR_REPORTING_FILE_MISSING);
     }
   }
 
