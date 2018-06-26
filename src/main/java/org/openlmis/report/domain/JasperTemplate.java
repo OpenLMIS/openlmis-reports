@@ -72,6 +72,11 @@ public class JasperTemplate extends BaseEntity {
   private String description;
 
   @ElementCollection
+  @Getter
+  @Setter
+  private List<String> supportedFormats;
+
+  @ElementCollection
   @CollectionTable
   @Getter
   @Setter
@@ -110,6 +115,7 @@ public class JasperTemplate extends BaseEntity {
     exporter.setId(id);
     exporter.setName(name);
     exporter.setType(type);
+    exporter.setSupportedFormats(supportedFormats);
   }
 
   @PrePersist
@@ -136,5 +142,7 @@ public class JasperTemplate extends BaseEntity {
     void setDescription(String description);
 
     void setRequiredRights(List<String> rights);
+
+    void setSupportedFormats(List<String> formats);
   }
 }

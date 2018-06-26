@@ -58,6 +58,10 @@ public class JasperTemplateDto implements JasperTemplate.Exporter {
 
   @Getter
   @Setter
+  private List<String> supportedFormats;
+
+  @Getter
+  @Setter
   private List<JasperTemplateParameter.Exporter> templateParameters;
 
   /**

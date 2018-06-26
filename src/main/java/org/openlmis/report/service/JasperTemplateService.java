@@ -71,7 +71,8 @@ public class JasperTemplateService {
   static final String REPORT_TYPE_PROPERTY = "reportType";
   private static final String DEFAULT_REPORT_TYPE = "Consistency Report";
   private static final String[] ALLOWED_FILETYPES = {"jrxml"};
-
+  protected static final String SUPPORTED_FORMATS_PROPERTY = "supportedFormats";
+  
   @Autowired
   private JasperTemplateRepository jasperTemplateRepository;
 
@@ -231,6 +232,11 @@ public class JasperTemplateService {
         jasperTemplate.setType(reportType);
       }
 
+      String formats = report.getProperty(SUPPORTED_FORMATS_PROPERTY);
+      if (formats != null) {
+        jasperTemplate.setSupportedFormats(extractListProperties(formats));
+      }
+
       JRParameter[] jrParameters = report.getParameters();
 
       if (jrParameters != null && jrParameters.length > 0) {
@@ -347,12 +353,15 @@ public class JasperTemplateService {
   }
 
   private List<String> extractListProperties(JRParameter parameter, String property) {
-    String dependencyProperty = parameter.getPropertiesMap().getProperty(property);
+    return extractListProperties(
+        parameter.getPropertiesMap().getProperty(property));
+  }
 
-    if (dependencyProperty != null) {
+  private List<String> extractListProperties(String property) {
+    if (property != null) {
       // split by unescaped commas
       return Arrays
-          .stream(dependencyProperty.split("(?<!\\\\),"))
+          .stream(property.split("(?<!\\\\),"))
           .map(option -> option.replace("\\,", ","))
           .collect(Collectors.toList());
     }
