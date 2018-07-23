@@ -3,7 +3,6 @@
 
 Improvements:
 * [OLMIS-4649](https://openlmis.atlassian.net/browse/OLMIS-4649): Added Jenkinsfile
-* [OLMIS-2923](https://openlmis.atlassian.net/browse/OLMIS-2923): Updated demo data loading approach
 * [OLMIS-4459](https://openlmis.atlassian.net/browse/OLMIS-4459): Pick Pack List no longer displays values in a separate line if there's no lot defined
 
 Bugs:

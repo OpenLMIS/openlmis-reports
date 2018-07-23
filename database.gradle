@@ -22,8 +22,3 @@ task generateMigration {
         migrationFile.createNewFile()
     }
 }
-
-task demoDataSeed(type:Exec) {
-    executable "./demo-data/demo_seed.sh"
-    args "demo-data", "build/data/demo-data", "demo-data/generator.js"
-}

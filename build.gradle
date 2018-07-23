@@ -66,8 +66,6 @@ idea {
 }
 
 processResources {
-    dependsOn demoDataSeed
-
     // we want the generated HTML spec file included in the output jar
     finalizedBy ramlToHtml
 
