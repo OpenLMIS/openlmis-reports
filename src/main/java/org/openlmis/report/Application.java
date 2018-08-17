@@ -15,6 +15,8 @@
 
 package org.openlmis.report;
 
+import java.time.Clock;
+import java.time.ZoneId;
 import org.javers.core.Javers;
 import org.javers.core.MappingStyle;
 import org.javers.core.diff.ListCompareAlgorithm;
@@ -50,6 +52,9 @@ import java.util.Locale;
 public class Application {
   private static Logger LOGGER = LoggerFactory.getLogger(Application.class);
 
+  @Value("${time.zoneId}")
+  private String timeZoneId;
+
   @Autowired
   private DialectName dialectName;
 
@@ -74,6 +79,16 @@ public class Application {
     lr.setCookieName("lang");
     lr.setDefaultLocale(Locale.ENGLISH);
     return lr;
+  }
+
+  /**
+   * Creates new Clock.
+   *
+   * @return Created clock.
+   */
+  @Bean
+  public Clock clock() {
+    return Clock.system(ZoneId.of(timeZoneId));
   }
 
   /**
