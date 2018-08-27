@@ -17,6 +17,7 @@ apply plugin: 'java'
 apply plugin: 'idea'
 apply plugin: 'spring-boot'
 apply plugin: 'jacoco'
+apply plugin: 'checkstyle'
 
 sourceSets {
     integrationTest {
@@ -73,6 +74,10 @@ processResources {
     filesMatching('**/version.properties') {
         expand(project.properties)
     }
+}
+
+checkstyle {
+    toolVersion = "8.12"
 }
 
 check {

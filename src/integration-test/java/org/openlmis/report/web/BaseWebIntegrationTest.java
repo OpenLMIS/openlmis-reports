@@ -5,12 +5,12 @@
  * This program is free software: you can redistribute it and/or modify it under the terms
  * of the GNU Affero General Public License as published by the Free Software Foundation, either
  * version 3 of the License, or (at your option) any later version.
- *  
+ *
  * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Affero General Public License for more details. You should have received a copy of
  * the GNU Affero General Public License along with this program. If not, see
- * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
+ * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org.
  */
 
 package org.openlmis.report.web;
@@ -19,23 +19,33 @@ import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
-import static org.openlmis.report.i18n.PermissionMessageKeys.ERROR_NO_PERMISSION;
-import static org.openlmis.report.web.utils.WireMockResponses.MOCK_CHECK_RESULT;
-import static org.openlmis.report.web.utils.WireMockResponses.MOCK_TOKEN_REQUEST_RESPONSE;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
+import static org.openlmis.report.i18n.PermissionMessageKeys.ERROR_NO_PERMISSION;
+import static org.openlmis.report.web.utils.WireMockResponses.MOCK_CHECK_RESULT;
+import static org.openlmis.report.web.utils.WireMockResponses.MOCK_TOKEN_REQUEST_RESPONSE;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.jayway.restassured.RestAssured;
 import com.jayway.restassured.config.ObjectMapperConfig;
 import com.jayway.restassured.config.RestAssuredConfig;
-
+import guru.nidi.ramltester.RamlDefinition;
+import guru.nidi.ramltester.RamlLoaders;
+import guru.nidi.ramltester.restassured.RestAssuredClient;
+import java.util.UUID;
+import javax.annotation.PostConstruct;
 import org.junit.Rule;
 import org.junit.runner.RunWith;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.openlmis.report.domain.BaseEntity;
+import org.openlmis.report.dto.external.referencedata.UserDto;
+import org.openlmis.report.exception.PermissionMessageException;
+import org.openlmis.report.service.PermissionService;
+import org.openlmis.report.utils.AuthenticationHelper;
+import org.openlmis.report.utils.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.embedded.LocalServerPort;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -44,20 +54,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import java.util.UUID;
-
-import javax.annotation.PostConstruct;
-
-import guru.nidi.ramltester.RamlDefinition;
-import guru.nidi.ramltester.RamlLoaders;
-import guru.nidi.ramltester.restassured.RestAssuredClient;
-import org.openlmis.report.domain.BaseEntity;
-import org.openlmis.report.dto.external.referencedata.UserDto;
-import org.openlmis.report.exception.PermissionMessageException;
-import org.openlmis.report.service.PermissionService;
-import org.openlmis.report.utils.AuthenticationHelper;
-import org.openlmis.report.utils.Message;
 
 
 @RunWith(SpringRunner.class)
