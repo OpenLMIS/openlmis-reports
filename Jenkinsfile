@@ -84,7 +84,7 @@ pipeline {
         stage('Deploy to test') {
             when {
                 expression {
-                    return CURRENT_BRANCH == 'master'
+                    return CURRENT_BRANCH == 'master' && VERSION.endsWith("SNAPSHOT")
                 }
             }
             steps {
@@ -180,6 +180,7 @@ pipeline {
                 }
             }
             steps {
+                sh "docker pull openlmis/report:${STAGING_VERSION}"
                 sh "docker tag openlmis/report:${STAGING_VERSION} openlmis/report:${VERSION}"
                 sh "docker push openlmis/report:${VERSION}"
             }
