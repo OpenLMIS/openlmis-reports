@@ -18,3 +18,4 @@ docker-compose -f docker-compose.builder.yml run -e BUILD_NUMBER=$BUILD_NUMBER -
 docker-compose -f docker-compose.builder.yml build image
 docker tag openlmis/report:latest openlmis/report:$STAGING_VERSION
 docker push openlmis/report:$STAGING_VERSION
+echo $STAGING_VERSION
