@@ -84,7 +84,7 @@ pipeline {
         stage('Deploy to test') {
             when {
                 expression {
-                    return CURRENT_BRANCH == 'master'
+                    return CURRENT_BRANCH == 'master' && VERSION.endsWith("SNAPSHOT")
                 }
             }
             steps {
