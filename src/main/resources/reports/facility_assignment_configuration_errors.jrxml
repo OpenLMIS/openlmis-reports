@@ -5,6 +5,9 @@
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="Sample DB"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w1" value="230"/>
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="764"/>
+	<import value="java.time.format.DateTimeFormatter"/>
+	<import value="java.time.LocalDate"/>
+	<parameter name="dateFormat" class="java.lang.String" isForPrompting="true"/>
 	<queryString language="plsql">
 		<![CDATA[SELECT
   DISTINCT facilities.code AS facility_code,
@@ -104,7 +107,7 @@ ORDER BY
 			<textField pattern="MMMMM dd, yyyy">
 				<reportElement x="450" y="0" width="100" height="20" uuid="7e71222a-5f8f-4569-a08a-c9a0d4baa75f"/>
 				<textElement textAlignment="Right" verticalAlignment="Top"/>
-				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[DateTimeFormatter.ofPattern($P{dateFormat}).format(LocalDate.now())]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="110" y="15" width="340" height="30" uuid="2eae18a6-3ef5-4262-a8f1-f70181687cef"/>

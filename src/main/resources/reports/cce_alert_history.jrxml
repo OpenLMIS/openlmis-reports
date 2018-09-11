@@ -28,6 +28,7 @@
 	</style>
 	<subDataset name="ItemDataSource" uuid="2914f7c6-c2d7-448b-b0c1-090970e18ed6">
 		<parameter name="inventoryItemId" class="java.lang.String"/>
+		<parameter name="dateTimeFormat" class="java.lang.String" isForPrompting="false"/>
 		<queryString language="plsql">
 			<![CDATA[SELECT
     CASE ca.active
@@ -54,6 +55,7 @@ ORDER BY ca.active DESC
 	<parameter name="inventoryItemId" class="java.lang.String">
 		<property name="displayName" value="Inventory Item ID"/>
 	</parameter>
+	<parameter name="dateTimeFormat" class="java.lang.String" isForPrompting="false"/>
 	<queryString language="plsql">
 		<![CDATA[SELECT
     cii.referencename AS inventoryItemReferenceName
@@ -93,7 +95,7 @@ WHERE cii.id = $P{inventoryItemId}::uuid]]>
 			</textField>
 			<textField>
 				<reportElement positionType="FixRelativeToBottom" x="0" y="75" width="400" height="15" uuid="7e71222a-5f8f-4569-a08a-c9a0d4baa75f"/>
-				<textFieldExpression><![CDATA["Generated on: " + DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss z").format(ZonedDateTime.now())]]></textFieldExpression>
+				<textFieldExpression><![CDATA["Generated on: " + DateTimeFormatter.ofPattern($P{dateTimeFormat}).format(ZonedDateTime.now())]]></textFieldExpression>
 			</textField>
 		</band>
 	</title>
@@ -176,7 +178,7 @@ WHERE cii.id = $P{inventoryItemId}::uuid]]>
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 								<reportElement x="0" y="0" width="150" height="30" uuid="dea55055-579f-4a6a-9f37-139785c085bf"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
-								<textFieldExpression><![CDATA[DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss z").format(ZonedDateTime.parse($F{dateStarted}))]]></textFieldExpression>
+								<textFieldExpression><![CDATA[DateTimeFormatter.ofPattern($P{dateTimeFormat}).format(ZonedDateTime.parse($F{dateStarted}))]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
@@ -196,7 +198,7 @@ WHERE cii.id = $P{inventoryItemId}::uuid]]>
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 								<reportElement x="0" y="0" width="150" height="30" uuid="a5963f2f-d12f-4ad7-9ad4-8fd54205754b"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
-								<textFieldExpression><![CDATA[DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss z").format(ZonedDateTime.parse($F{dateEnded}))]]></textFieldExpression>
+								<textFieldExpression><![CDATA[DateTimeFormatter.ofPattern($P{dateTimeFormat}).format(ZonedDateTime.parse($F{dateEnded}))]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
@@ -215,7 +217,7 @@ WHERE cii.id = $P{inventoryItemId}::uuid]]>
 							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 								<reportElement x="0" y="0" width="150" height="30" uuid="b02df90b-8663-4fe7-a569-0c67c75a8f51"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
-								<textFieldExpression><![CDATA[DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss z").format(ZonedDateTime.parse($F{dateDismissed}))]]></textFieldExpression>
+								<textFieldExpression><![CDATA[DateTimeFormatter.ofPattern($P{dateTimeFormat}).format(ZonedDateTime.parse($F{dateDismissed}))]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>

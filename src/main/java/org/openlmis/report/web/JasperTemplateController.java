@@ -37,6 +37,7 @@ import org.openlmis.report.service.JasperTemplateService;
 import org.openlmis.report.service.PermissionService;
 import org.openlmis.report.utils.Message;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
@@ -67,6 +68,12 @@ public class JasperTemplateController extends BaseController {
 
   @Autowired
   private PermissionService permissionService;
+
+  @Value("${dateTimeFormat}")
+  private String dateTimeFormat;
+
+  @Value("${dateFormat}")
+  private String dateFormat;
 
   /**
    * Adding report templates with ".jrxml" format to database.
@@ -181,6 +188,8 @@ public class JasperTemplateController extends BaseController {
     map.putAll(jasperTemplateService.mapReportImagesToTemplate(template));
 
     map.put("format", format);
+    map.put("dateTimeFormat", dateTimeFormat);
+    map.put("dateFormat", dateFormat);
 
     JasperReportsMultiFormatView jasperView = jasperReportsViewService
         .getJasperReportsView(template, request);

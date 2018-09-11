@@ -40,6 +40,7 @@ NC0xMzJjNjI2OWRkODc7]]>
         <property name="com.jaspersoft.studio.data.defaultdataadapter" value="core/local_core.xml"/>
         <property name="com.jaspersoft.studio.data.sql.tables" value=""/>
         <parameter name="shipmentDraftId" class="java.lang.String"/>
+        <parameter name="dateFormat" class="java.lang.String" isForPrompting="false"/>
         <queryString>
             <![CDATA[SELECT
 	o.orderCode AS orderCode,
@@ -283,7 +284,7 @@ ORDER BY
                         <jr:detailCell style="Table_TD" height="60">
                             <textField>
                                 <reportElement x="0" y="0" width="480" height="15" uuid="03004ca1-4080-437a-a66d-097b681ed43f"/>
-                                <textFieldExpression><![CDATA["Generated on: " + DateTimeFormatter.ofPattern("dd MMMM yyyy").format(LocalDate.now())]]></textFieldExpression>
+                                <textFieldExpression><![CDATA["Generated on: " + DateTimeFormatter.ofPattern($P{dateFormat}).format(LocalDate.now())]]></textFieldExpression>
                             </textField>
                             <textField>
                                 <reportElement x="0" y="15" width="480" height="15" uuid="cf02560e-c75a-4247-beb5-c6e45e390591"/>
