@@ -7,7 +7,7 @@
 	<property name="com.jaspersoft.studio.data.sql.SQLQueryDesigner.sash.w2" value="764"/>
 	<import value="java.time.format.DateTimeFormatter"/>
 	<import value="java.time.LocalDate"/>
-	<parameter name="dateFormat" class="java.lang.String" isForPrompting="true"/>
+	<parameter name="dateFormat" class="java.lang.String" isForPrompting="false"/>
 	<queryString language="plsql">
 		<![CDATA[SELECT
   DISTINCT facilities.code AS facility_code,
