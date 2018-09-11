@@ -104,7 +104,7 @@ ORDER BY
 	<title>
 		<band height="60" splitType="Stretch">
 			<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
-			<textField pattern="MMMMM dd, yyyy">
+			<textField>
 				<reportElement x="450" y="0" width="100" height="20" uuid="7e71222a-5f8f-4569-a08a-c9a0d4baa75f"/>
 				<textElement textAlignment="Right" verticalAlignment="Top"/>
 				<textFieldExpression><![CDATA[DateTimeFormatter.ofPattern($P{dateFormat}).format(LocalDate.now())]]></textFieldExpression>
