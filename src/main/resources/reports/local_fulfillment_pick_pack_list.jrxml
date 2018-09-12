@@ -42,7 +42,7 @@ NC0xMzJjNjI2OWRkODc7]]>
         <property name="com.jaspersoft.studio.data.sql.tables" value=""/>
         <parameter name="shipmentDraftId" class="java.lang.String"/>
         <parameter name="dateFormat" class="java.lang.String" isForPrompting="false"/>
-        <queryString language="plsql">
+        <queryString>
             <![CDATA[SELECT
 	o.orderCode AS orderCode,
 	rf.name AS requestingFacilityName,
