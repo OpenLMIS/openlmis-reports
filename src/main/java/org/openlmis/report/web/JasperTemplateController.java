@@ -18,6 +18,8 @@ package org.openlmis.report.web;
 import static org.apache.commons.lang3.BooleanUtils.isNotFalse;
 import static org.openlmis.report.i18n.JasperMessageKeys.ERROR_JASPER_TEMPLATE_NOT_FOUND;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -74,6 +76,15 @@ public class JasperTemplateController extends BaseController {
 
   @Value("${dateFormat}")
   private String dateFormat;
+
+  @Value("${groupingSeparator}")
+  private String groupingSeparator;
+
+  @Value("${groupingSize}")
+  private String groupingSize;
+
+  @Value("${time.zoneId}")
+  private String timeZoneId;
 
   /**
    * Adding report templates with ".jrxml" format to database.
@@ -190,6 +201,12 @@ public class JasperTemplateController extends BaseController {
     map.put("format", format);
     map.put("dateTimeFormat", dateTimeFormat);
     map.put("dateFormat", dateFormat);
+    map.put("timeZoneId", timeZoneId);
+    DecimalFormatSymbols decimalFormatSymbols = new DecimalFormatSymbols();
+    decimalFormatSymbols.setGroupingSeparator(groupingSeparator.charAt(0));
+    DecimalFormat decimalFormat = new DecimalFormat("", decimalFormatSymbols);
+    decimalFormat.setGroupingSize(Integer.parseInt(groupingSize));
+    map.put("decimalFormat", decimalFormat);
 
     JasperReportsMultiFormatView jasperView = jasperReportsViewService
         .getJasperReportsView(template, request);
@@ -203,5 +220,4 @@ public class JasperTemplateController extends BaseController {
 
     return new ModelAndView(jasperView, map);
   }
-
 }
