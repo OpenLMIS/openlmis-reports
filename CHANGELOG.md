@@ -1,3 +1,9 @@
+1.1.3 / WIP
+==================
+
+Improvements:
+* [OLMIS-4531](https://openlmis.atlassian.net/browse/OLMIS-4531): Added compressing HTTP POST responses.
+
 1.1.2 / 2018-12-12
 ==================
 
