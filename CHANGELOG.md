@@ -1,8 +1,15 @@
+1.1.4 / WIP
+=================
+
+Improvements:
+* [OLMIS-4128](https://openlmis.atlassian.net/browse/OLMIS-4128): Change maximum page size to max integer.
+
 1.1.3 / 2019-05-27
 ==================
 
 Improvements:
 * [OLMIS-4531](https://openlmis.atlassian.net/browse/OLMIS-4531): Added compressing HTTP POST responses.
+
 
 1.1.2 / 2018-12-12
 ==================
