@@ -4,6 +4,7 @@
 Improvements:
 * [OLMIS-4128](https://openlmis.atlassian.net/browse/OLMIS-4128): Change maximum page size to max integer.
 * [OLMIS-6129](https://openlmis.atlassian.net/browse/OLMIS-6129): Added package-lock.json file.
+* [OLMIS-6494](https://openlmis.atlassian.net/browse/OLMIS-6494): Updated Pick Pack report to display the correct version of an orderable.
 
 1.1.3 / 2019-05-27
 ==================

@@ -87,6 +87,7 @@ FROM
   JOIN
   referencedata.orderables orderable
     ON orderable.id = shipment_li.orderableid
+    AND orderable.versionnumber = shipment_li.orderableversionnumber
   JOIN
   referencedata.dispensables dispensable
     ON dispensable.id = orderable.dispensableid
@@ -94,7 +95,7 @@ FROM
                                                        AND (shipment_orderable_identifier.key = 'tradeItem' OR shipment_orderable_identifier.key = 'commodityType')
   LEFT JOIN
   fulfillment.order_line_items order_li
-    ON order_li.orderid = ord.id AND (shipment_li.orderableid = order_li.orderableid OR order_li.orderableid IN
+    ON order_li.orderid = ord.id AND (shipment_li.orderableid = order_li.orderableid AND shipment_li.orderableversionnumber = order_li.orderableversionnumber OR order_li.orderableid IN
     (
       SELECT
         o.id
@@ -148,6 +149,7 @@ FROM
   LEFT JOIN
   referencedata.orderables order_orderable
     ON order_orderable.id = order_li.orderableid
+    AND order_orderable.versionnumber = order_li.orderableversionnumber
   LEFT JOIN
   stockmanagement.stock_cards stock_card
     ON (stock_card.facilityId = ord.supplyingFacilityId AND stock_card.programId = ord.programId AND shipment_li.orderableId = stock_card.orderableId AND ((shipment_li.lotId IS NULL AND stock_card.lotId IS NULL) OR shipment_li.lotId = stock_card.lotId))
