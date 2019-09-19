@@ -19,7 +19,6 @@ dependencies {
 
     compile "org.openlmis:openlmis-service-util:3.0.0"
 
-    compile "com.github.tomakehurst:wiremock:1.58"
     compile "commons-codec:commons-codec:1.10"
     compile "commons-io:commons-io:2.4"
     compile "net.sf.jasperreports:jasperreports:6.5.1"
