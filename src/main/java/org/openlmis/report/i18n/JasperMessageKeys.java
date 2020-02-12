@@ -20,4 +20,7 @@ public class JasperMessageKeys extends ReportingMessageKeys {
 
   public static final String ERROR_JASPER_FILE_CREATION = join(ERROR, "file", "creation");
   public static final String ERROR_JASPER_TEMPLATE_NOT_FOUND = join(ERROR, "template", NOT_FOUND);
+  public static final String ERROR_JASPER_REPORT_GENERATION = join(ERROR, "report", "generation");
+  public static final String ERROR_JASPER_REPORT_FORMAT_UNKNOWN = 
+      join(ERROR, "report", "format", "unknown");
 }

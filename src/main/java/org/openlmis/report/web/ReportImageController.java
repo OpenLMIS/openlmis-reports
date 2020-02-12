@@ -105,13 +105,8 @@ public class ReportImageController extends BaseController {
       @PathVariable("id") UUID reportImageId) {
     permissionService.canViewReports();
 
-    ReportImage reportImage = reportImageRepository.findOne(reportImageId);
-    if (reportImage == null) {
-      throw new NotFoundMessageException(
-          new Message(ERROR_NOT_FOUND));
-    } else {
-      return reportImage;
-    }
+    return reportImageRepository.findById(reportImageId)
+        .orElseThrow(() -> new NotFoundMessageException(new Message(ERROR_NOT_FOUND)));
   }
 
   /**
@@ -125,12 +120,8 @@ public class ReportImageController extends BaseController {
       @PathVariable("id") UUID reportImageId) {
     permissionService.canEditReportTemplates();
 
-    ReportImage reportImage = reportImageRepository.findOne(reportImageId);
-    if (reportImage == null) {
-      throw new NotFoundMessageException(
-          new Message(ERROR_NOT_FOUND));
-    } else {
-      reportImageRepository.delete(reportImage);
-    }
+    ReportImage reportImage = reportImageRepository.findById(reportImageId)
+        .orElseThrow(() -> new NotFoundMessageException(new Message(ERROR_NOT_FOUND)));
+    reportImageRepository.delete(reportImage);
   }
 }

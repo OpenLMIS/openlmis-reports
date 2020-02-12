@@ -121,7 +121,7 @@ public class PageImplRepresentation<T> extends PageImpl<T> {
   }
 
   public PageImpl<T> pageImpl() {
-    return new PageImpl<T>(getContent(), new PageRequest(getNumber(),
+    return new PageImpl<T>(getContent(), PageRequest.of(getNumber(),
             getSize(), getSort()), getTotalElements());
   }
 }

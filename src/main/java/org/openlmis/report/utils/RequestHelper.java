@@ -15,10 +15,8 @@
 
 package org.openlmis.report.utils;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import org.apache.commons.codec.Charsets;
-import org.openlmis.report.exception.EncodingException;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -45,12 +43,8 @@ public final class RequestHelper {
 
     if (parameters != null) {
       parameters.forEach(e -> {
-        try {
-          builder.queryParam(e.getKey(),
-                  UriUtils.encodeQueryParam(String.valueOf(e.getValue()), Charsets.UTF_8.name()));
-        } catch (UnsupportedEncodingException ex) {
-          throw new EncodingException(ex);
-        }
+        builder.queryParam(e.getKey(),
+                UriUtils.encodeQueryParam(String.valueOf(e.getValue()), Charsets.UTF_8.name()));
       });
     }
 

@@ -1,6 +1,6 @@
 /*
  * This program is part of the OpenLMIS logistics management information system platform software.
- * Copyright © 2017 VillageReach
+ * Copyright © 2020 VillageReach
  *
  * This program is free software: you can redistribute it and/or modify it under the terms
  * of the GNU Affero General Public License as published by the Free Software Foundation, either
@@ -15,24 +15,28 @@
 
 package org.openlmis.report.service;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import net.sf.jasperreports.engine.JRExporter;
+import java.io.ByteArrayOutputStream;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.export.HtmlExporter;
-import org.junit.Test;
+import net.sf.jasperreports.export.SimpleExporterInput;
+import net.sf.jasperreports.export.SimpleHtmlExporterOutput;
 
-public class JasperReportsHtmlViewTest {
+public class JasperHtmlExporter implements JasperExporter {
 
-  private JasperReportsHtmlView jasperReportsHtmlView = new JasperReportsHtmlView();
+  private JasperPrint jasperPrint;
 
-  @Test
-  public void shouldReturnInstanceOfHtmlExporter() {
-    JRExporter jrExporter = jasperReportsHtmlView.createExporter();
-
-    // We make sure to use HtmlExporter over deprecated and removed JrHtmlExporter
-    assertTrue(jrExporter instanceof HtmlExporter);
-    assertEquals("text/html", jasperReportsHtmlView.getContentType());
+  JasperHtmlExporter(JasperPrint jasperPrint) {
+    this.jasperPrint = jasperPrint;
   }
 
+  @Override
+  public byte[] exportReport() throws JRException {
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    HtmlExporter exporter = new HtmlExporter();
+    exporter.setExporterInput(new SimpleExporterInput(jasperPrint));
+    exporter.setExporterOutput(new SimpleHtmlExporterOutput(baos));
+    exporter.exportReport();
+    return baos.toByteArray();
+  }
 }

@@ -1,6 +1,6 @@
 /*
  * This program is part of the OpenLMIS logistics management information system platform software.
- * Copyright © 2017 VillageReach
+ * Copyright © 2020 VillageReach
  *
  * This program is free software: you can redistribute it and/or modify it under the terms
  * of the GNU Affero General Public License as published by the Free Software Foundation, either
@@ -13,34 +13,11 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org.
  */
 
-package org.openlmis.report.repository;
+package org.openlmis.report.service;
 
-import java.io.Serializable;
-import org.springframework.data.repository.NoRepositoryBean;
-import org.springframework.data.repository.PagingAndSortingRepository;
+import net.sf.jasperreports.engine.JRException;
 
-/*
-    The ReferenceDataRepository exists as a convenient way to expose all read-only members of
-    PagingAndSortingRepository and CrudRepository.
- */
-@NoRepositoryBean
-public interface ReferenceDataRepository<T, IDT extends Serializable>
-    extends PagingAndSortingRepository<T, IDT> {
-  @Override
-  void delete(T entity);
+public interface JasperExporter {
 
-  @Override
-  void deleteById(IDT id);
-
-  @Override
-  void deleteAll(Iterable<? extends T> entities);
-
-  @Override
-  void deleteAll();
-
-  @Override
-  <S extends T> S save(S entity);
-
-  @Override
-  <S extends T> Iterable<S> saveAll(Iterable<S> entities);
+  byte[] exportReport() throws JRException;
 }

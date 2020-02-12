@@ -1,14 +1,10 @@
 {
   "name": "openlmis-report",
   "version": "1.0.0",
-
-  "devDependencies":
-  {
+  "devDependencies": {
     "raml2html": "~2.4.0"
   },
-
-  "scripts":
-  {
+  "scripts": {
     "runApiHtmlConverter": "raml2html --input /app/build/resources/main/api-definition-raml.yaml --output /app/build/resources/main/api-definition.html"
   }
 }

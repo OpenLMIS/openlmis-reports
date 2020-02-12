@@ -257,6 +257,8 @@ resourceTypes:
               description: Get all templates.
               responses:
                   200:
+                      headers:
+                        Keep-Alive:
                       body:
                         application/json:
                           schema: jasperTemplateDtoArray
@@ -276,11 +278,15 @@ resourceTypes:
                   description: Delete chosen template.
                   responses:
                       204:
+                          headers:
+                            Keep-Alive:
                       403:
                           body:
                             application/json:
                                 schema: localizedMessage
                       404:
+                          headers:
+                            Keep-Alive:
                           body:
                             application/json:
                               schema: localizedMessage
@@ -289,6 +295,8 @@ resourceTypes:
                   description: Get chosen template.
                   responses:
                       200:
+                          headers:
+                            Keep-Alive:
                           body:
                             application/json:
                               schema: jasperTemplateDto
@@ -297,6 +305,8 @@ resourceTypes:
                             application/json:
                                 schema: localizedMessage
                       404:
+                          headers:
+                            Keep-Alive:
                           body:
                             application/json:
                                 schema: localizedMessage
@@ -318,10 +328,14 @@ resourceTypes:
                                 application/vnd.ms-excel:
                                 text/html:
                           403:
+                              headers:
+                                Keep-Alive:
                               body:
                                 application/json:
                                     schema: localizedMessage
                           404:
+                              headers:
+                                Keep-Alive:
                               body:
                                 application/json:
                                     schema: localizedMessage

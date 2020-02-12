@@ -23,7 +23,6 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.openlmis.report.service.PermissionService.REPORTS_VIEW;
 
@@ -31,22 +30,18 @@ import guru.nidi.ramltester.junit.RamlMatchers;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Properties;
+import java.util.Optional;
 import java.util.UUID;
-import javax.servlet.http.HttpServletRequest;
 import org.junit.Before;
 import org.junit.Test;
 import org.openlmis.report.domain.JasperTemplate;
 import org.openlmis.report.dto.JasperTemplateDto;
-import org.openlmis.report.exception.JasperReportViewException;
 import org.openlmis.report.exception.PermissionMessageException;
 import org.openlmis.report.repository.JasperTemplateRepository;
-import org.openlmis.report.service.JasperReportsViewService;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.web.servlet.view.jasperreports.JasperReportsMultiFormatView;
 
 @SuppressWarnings("PMD.TooManyMethods")
 public class JasperTemplateControllerIntegrationTest extends BaseWebIntegrationTest {
@@ -58,9 +53,6 @@ public class JasperTemplateControllerIntegrationTest extends BaseWebIntegrationT
 
   @MockBean
   private JasperTemplateRepository jasperTemplateRepository;
-
-  @MockBean
-  private JasperReportsViewService jasperReportsViewService;
 
   @Before
   public void setUp() {
@@ -116,7 +108,7 @@ public class JasperTemplateControllerIntegrationTest extends BaseWebIntegrationT
   @Test
   public void shouldNotDeleteNonExistentTemplate() {
     // given
-    given(jasperTemplateRepository.findOne(anyUuid())).willReturn(null);
+    given(jasperTemplateRepository.findById(anyUuid())).willReturn(Optional.empty());
 
     // when
     restAssured.given()
@@ -158,7 +150,7 @@ public class JasperTemplateControllerIntegrationTest extends BaseWebIntegrationT
   @Test
   public void shouldNotGetNonExistentTemplate() {
     // given
-    given(jasperTemplateRepository.findOne(anyUuid())).willReturn(null);
+    given(jasperTemplateRepository.findById(anyUuid())).willReturn(Optional.empty());
 
     // when
     restAssured.given()
@@ -180,7 +172,8 @@ public class JasperTemplateControllerIntegrationTest extends BaseWebIntegrationT
   public void generateReportShouldRejectWhenUserHasNoViewReportsRight() {
     // given
     JasperTemplate template = generateExistentTemplate();
-    given(jasperTemplateRepository.findOne(template.getId())).willReturn(template);
+    given(jasperTemplateRepository.findById(template.getId())).willReturn(
+        java.util.Optional.of(template));
 
     doThrow(mockPermissionException(REPORTS_VIEW)).when(permissionService).canViewReports();
 
@@ -200,35 +193,9 @@ public class JasperTemplateControllerIntegrationTest extends BaseWebIntegrationT
   }
 
   @Test
-  public void generateReportShouldNotRejectWhenUserHasNoViewReportsRightAndTemplateIsHidden()
-      throws JasperReportViewException {
-    // given
-    JasperTemplate template = generateExistentTemplate();
-    template.setVisible(false);
-
-    JasperReportsMultiFormatView view = mock(JasperReportsMultiFormatView.class);
-    given(view.getContentDispositionMappings()).willReturn(new Properties());
-
-    given(jasperTemplateRepository.findOne(template.getId())).willReturn(template);
-    given(jasperReportsViewService
-        .getJasperReportsView(eq(template), any(HttpServletRequest.class)))
-        .willReturn(view);
-
-    // when
-    restAssured.given()
-        .header(HttpHeaders.AUTHORIZATION, getTokenHeader())
-        .pathParam("id", template.getId())
-        .pathParam(FORMAT_PARAM, PDF_FORMAT)
-        .when()
-        .get(REPORT_URL)
-        .then()
-        .statusCode(HttpStatus.OK.value());
-  }
-
-  @Test
   public void generateReportShouldReturnNotFoundWhenReportTemplateDoesNotExist() {
     // given
-    given(jasperTemplateRepository.findOne(anyUuid())).willReturn(null);
+    given(jasperTemplateRepository.findById(anyUuid())).willReturn(Optional.empty());
 
     // when
     restAssured.given()
@@ -254,7 +221,7 @@ public class JasperTemplateControllerIntegrationTest extends BaseWebIntegrationT
     template.setRequiredRights(Collections.singletonList(deniedPermission));
 
     PermissionMessageException ex = mockPermissionException(deniedPermission);
-    doThrow(ex).when(permissionService).validatePermissions(any(String[].class));
+    doThrow(ex).when(permissionService).validatePermissions(any());
 
     // when
     restAssured.given()
@@ -271,54 +238,6 @@ public class JasperTemplateControllerIntegrationTest extends BaseWebIntegrationT
     assertThat(RAML_ASSERT_MESSAGE, restAssured.getLastReport(), RamlMatchers.hasNoViolations());
   }
 
-  @Test
-  public void shouldGenerateReportInPdfFormat() throws JasperReportViewException {
-    testGenerateReportInGivenFormat("application/pdf", PDF_FORMAT);
-  }
-
-  @Test
-  public void shouldGenerateReportInCsvFormat() throws JasperReportViewException {
-    testGenerateReportInGivenFormat("application/csv", "csv");
-  }
-
-  @Test
-  public void shouldGenerateReportInXlsFormat() throws JasperReportViewException {
-    testGenerateReportInGivenFormat("application/xls", "xls");
-  }
-
-  @Test
-  public void shouldGenerateReportInHtmlFormat() throws JasperReportViewException {
-    testGenerateReportInGivenFormat("text/html", "html");
-  }
-
-  // Helper methods
-
-  private void testGenerateReportInGivenFormat(String contentType, String formatParam)
-      throws JasperReportViewException {
-    // given
-    JasperTemplate template = generateExistentTemplate();
-
-    JasperReportsMultiFormatView view = mock(JasperReportsMultiFormatView.class);
-    given(view.getContentType()).willReturn(contentType);
-    given(view.getContentDispositionMappings()).willReturn(mock(Properties.class));
-    given(view.getContentDispositionMappings().getProperty("attachment.pdf")).willReturn("text");
-
-    given(jasperTemplateRepository.findOne(template.getId())).willReturn(template);
-    given(jasperReportsViewService
-        .getJasperReportsView(any(JasperTemplate.class), any(HttpServletRequest.class)))
-        .willReturn(view);
-
-    // when
-    restAssured.given()
-        .header(HttpHeaders.AUTHORIZATION, getTokenHeader())
-        .pathParam("id", template.getId())
-        .pathParam(FORMAT_PARAM, formatParam)
-        .when()
-        .get(REPORT_URL)
-        .then()
-        .statusCode(200);
-  }
-
   private JasperTemplate generateExistentTemplate() {
     return generateExistentTemplate(UUID.randomUUID());
   }
@@ -330,7 +249,7 @@ public class JasperTemplateControllerIntegrationTest extends BaseWebIntegrationT
     template.setName("name");
     template.setRequiredRights(new ArrayList<>());
 
-    given(jasperTemplateRepository.findOne(id)).willReturn(template);
+    given(jasperTemplateRepository.findById(id)).willReturn(Optional.of(template));
 
     return template;
   }

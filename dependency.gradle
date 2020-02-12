@@ -13,7 +13,7 @@ dependencies {
     compile "org.springframework.boot:spring-boot-starter-data-rest"
     compile "org.springframework.boot:spring-boot-starter-web"
     compile "org.springframework.boot:spring-boot-starter-security"
-    compile "org.springframework.security.oauth:spring-security-oauth2"
+    compile "org.springframework.security.oauth.boot:spring-security-oauth2-autoconfigure:2.2.2.RELEASE"
     compile "com.fasterxml.jackson.datatype:jackson-datatype-jsr310"
     compile "com.fasterxml.jackson.datatype:jackson-datatype-hibernate4"
 
@@ -23,7 +23,7 @@ dependencies {
     compile "commons-io:commons-io:2.4"
     compile "net.sf.jasperreports:jasperreports:6.5.1"
     compile "org.apache.commons:commons-lang3:3.5"
-    compile "org.flywaydb:flyway-core:4.0.3"
+    compile "org.flywaydb:flyway-core"
     compile "org.javers:javers-spring-boot-starter-sql:2.8.1"
     compile "org.postgresql:postgresql:42.0.0"
     compile "org.projectlombok:lombok:1.16.8"
@@ -34,15 +34,15 @@ dependencies {
 
     testCompile "com.github.tomakehurst:wiremock:1.58"
     testCompile "com.jayway.restassured:rest-assured:2.7.0"
-    testCompile "guru.nidi.raml:raml-tester:0.8.9"
+    testCompile "guru.nidi.raml:raml-tester:0.8.15"
+    testCompile "org.raml:raml-parser:0.8.37"
     testCompile "io.rest-assured:rest-assured:3.0.0"
     testCompile "io.rest-assured:json-schema-validator:3.0.0"
     testCompile "io.rest-assured:spring-mock-mvc:3.0.0"
 
     testCompile "junit:junit"
-    testCompile "org.mockito:mockito-core:1.+"
-    testCompile "org.powermock:powermock-api-mockito:1.6.5"
-    testCompile "org.powermock:powermock-module-junit4:1.6.5"
+    testCompile "org.powermock:powermock-api-mockito2:2.0.4"
+    testCompile "org.powermock:powermock-module-junit4:2.0.4"
     testCompile "org.springframework.boot:spring-boot-starter-test"
     testCompile "nl.jqno.equalsverifier:equalsverifier:2.4"
 }
