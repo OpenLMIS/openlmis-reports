@@ -15,20 +15,11 @@
 
 package org.openlmis.report.service;
 
-import static java.io.File.createTempFile;
-import static org.apache.commons.io.FileUtils.writeByteArrayToFile;
-import static org.openlmis.report.i18n.JasperMessageKeys.ERROR_JASPER_FILE_CREATION;
 import static org.openlmis.report.i18n.JasperMessageKeys.ERROR_JASPER_REPORT_FORMAT_UNKNOWN;
 import static org.openlmis.report.i18n.JasperMessageKeys.ERROR_JASPER_REPORT_GENERATION;
-import static org.openlmis.report.i18n.ReportingMessageKeys.ERROR_REPORTING_CLASS_NOT_FOUND;
-import static org.openlmis.report.i18n.ReportingMessageKeys.ERROR_REPORTING_IO;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.Map;
 import javax.sql.DataSource;
 import net.sf.jasperreports.engine.JasperExportManager;
@@ -92,42 +83,5 @@ public class JasperReportsViewService {
     }
     
     return bytes;
-  }
-
-  /**
-   * Create ".jasper" file with byte array from Template.
-   *
-   * @return Url to ".jasper" file.
-   */
-  private String getReportUrlForReportData(JasperTemplate jasperTemplate)
-      throws JasperReportViewException {
-    File tmpFile;
-
-    try {
-      tmpFile = createTempFile(jasperTemplate.getName() + "_temp", ".jasper");
-    } catch (IOException exp) {
-      throw new JasperReportViewException(
-          exp, ERROR_JASPER_FILE_CREATION
-      );
-    }
-
-    try (ObjectInputStream inputStream =
-             new ObjectInputStream(new ByteArrayInputStream(jasperTemplate.getData()))) {
-      JasperReport jasperReport = (JasperReport) inputStream.readObject();
-
-      try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
-           ObjectOutputStream out = new ObjectOutputStream(bos)) {
-
-        out.writeObject(jasperReport);
-        writeByteArrayToFile(tmpFile, bos.toByteArray());
-
-        return tmpFile.toURI().toURL().toString();
-      }
-    } catch (IOException exp) {
-      throw new JasperReportViewException(exp, ERROR_REPORTING_IO, exp.getMessage());
-    } catch (ClassNotFoundException exp) {
-      throw new JasperReportViewException(
-          exp, ERROR_REPORTING_CLASS_NOT_FOUND, JasperReport.class.getName());
-    }
   }
 }
