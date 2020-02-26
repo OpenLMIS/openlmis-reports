@@ -211,9 +211,9 @@ public class JasperTemplateController extends BaseController {
     } else if ("xls".equals(format)) {
       mediaType = new MediaType("application", "vnd.ms-excel", StandardCharsets.UTF_8);
     } else if ("html".equals(format)) {
-      mediaType = new MediaType("text", "html", StandardCharsets.UTF_8);
+      mediaType = MediaType.TEXT_HTML;
     } else {
-      mediaType = new MediaType("application", "pdf", StandardCharsets.UTF_8);
+      mediaType = MediaType.APPLICATION_PDF;
     }
     String fileName = template.getName().replaceAll("\\s+", "_");
 
