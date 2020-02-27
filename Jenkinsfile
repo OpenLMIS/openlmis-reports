@@ -97,6 +97,11 @@ pipeline {
                         notifyAfterFailure()
                     }
                 }
+                always {
+                    script {
+                        sh "sudo rm -rf ${WORKSPACE}/{*,.*} || true"
+                    }
+                }
             }
         }
         stage('Deploy to test') {
@@ -154,6 +159,11 @@ pipeline {
                         failure {
                             script {
                                 notifyAfterFailure()
+                            }
+                        }
+                        always {
+                            script {
+                                sh "sudo rm -rf ${WORKSPACE}/{*,.*} || true"
                             }
                         }
                     }
