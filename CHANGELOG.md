@@ -1,5 +1,5 @@
-1.2.0 / WIP
-=================
+1.2.0 / 2020-04-14
+==================
 New functionality added in a backwards-compatible manner:
 * [OLMIS-6760](https://openlmis.atlassian.net/browse/OLMIS-6760): Update Spring Boot version to 2.x:
   * Spring Boot version is 2.2.2.
