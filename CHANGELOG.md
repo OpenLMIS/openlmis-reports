@@ -1,5 +1,12 @@
+1.2.1 / WIP
+=================
+
+Bugs:
+* [OLMIS-6887](https://openlmis.atlassian.net/browse/OLMIS-6887): Fixed a problem with subsequent jasper reports generation
+
 1.2.0 / 2020-04-14
 ==================
+
 New functionality added in a backwards-compatible manner:
 * [OLMIS-6760](https://openlmis.atlassian.net/browse/OLMIS-6760): Update Spring Boot version to 2.x:
   * Spring Boot version is 2.2.2.
@@ -25,7 +32,6 @@ Improvements:
 
 Improvements:
 * [OLMIS-4531](https://openlmis.atlassian.net/browse/OLMIS-4531): Added compressing HTTP POST responses.
-
 
 1.1.2 / 2018-12-12
 ==================
