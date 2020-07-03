@@ -15,27 +15,39 @@
 
 package org.openlmis.report.service;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
+import static org.powermock.api.mockito.PowerMockito.when;
 import static org.powermock.api.mockito.PowerMockito.whenNew;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+import javax.sql.DataSource;
+import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
+import org.openlmis.report.domain.JasperTemplate;
+import org.openlmis.report.exception.JasperReportViewException;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.modules.junit4.PowerMockRunnerDelegate;
-import org.powermock.reflect.internal.WhiteboxImpl;
 
 @RunWith(PowerMockRunner.class)
 @PowerMockRunnerDelegate(BlockJUnit4ClassRunner.class)
-@PrepareForTest({JasperReportsViewService.class})
+@PrepareForTest({JasperReportsViewService.class, JasperFillManager.class, DataSource.class})
 public class JasperReportsViewServiceTest {
 
   private static final String FORMAT_PARAM = "format";
@@ -52,45 +64,69 @@ public class JasperReportsViewServiceTest {
   @Mock
   private JasperPdfExporter jasperPdfExporter;
 
+  @Mock
+  private ObjectInputStream inputStream;
+
+  @Mock
+  private DataSource replicationDataSource;
+
   @Spy
+  private final JasperTemplate jasperTemplate = new JasperTemplate();
+
+  @Spy
+  @InjectMocks
   private final JasperReportsViewService viewService = new JasperReportsViewService();
 
   @Before
-  public void initializeExporterMocks() throws Exception {
-    whenNew(JasperCsvExporter.class).withAnyArguments().thenReturn(jasperCsvExporter);
-    whenNew(JasperXlsExporter.class).withAnyArguments().thenReturn(jasperXlsExporter);
-    whenNew(JasperHtmlExporter.class).withAnyArguments().thenReturn(jasperHtmlExporter);
-    whenNew(JasperPdfExporter.class).withAnyArguments().thenReturn(jasperPdfExporter);
+  public void init() throws Exception {
+    initializeExporterMocks();
+    whenNew(ObjectInputStream.class).withAnyArguments().thenReturn(inputStream);
+    whenNew(ByteArrayInputStream.class).withAnyArguments().thenReturn(null);
+    mockStatic(JasperFillManager.class);
+    when(JasperFillManager.fillReport(any(InputStream.class), any(), any(Connection.class)))
+        .thenReturn(new JasperPrint());
   }
 
   @Test
   public void shouldSelectCsvExporterForCsvFormat() throws Exception {
-    invokePrepareReportMethod(getParamsWithFormat("csv"));
+    viewService.getJasperReportsView(jasperTemplate, getParamsWithFormat("csv"));
     verify(jasperCsvExporter, times(1)).exportReport();
   }
 
   @Test
   public void shouldSelectPdfExporterForPdfFormat() throws Exception {
-    invokePrepareReportMethod(getParamsWithFormat("pdf"));
+    viewService.getJasperReportsView(jasperTemplate, getParamsWithFormat("pdf"));
     verify(jasperPdfExporter, times(1)).exportReport();
   }
 
   @Test
   public void shouldSelectXlsExporterForXlsFormat() throws Exception {
-    invokePrepareReportMethod(getParamsWithFormat("xls"));
+    viewService.getJasperReportsView(jasperTemplate, getParamsWithFormat("xls"));
     verify(jasperXlsExporter, times(1)).exportReport();
   }
 
   @Test
   public void shouldSelectHtmlExporterForHtmlFormat() throws Exception {
-    invokePrepareReportMethod(getParamsWithFormat("html"));
+    viewService.getJasperReportsView(jasperTemplate, getParamsWithFormat("html"));
     verify(jasperHtmlExporter, times(1)).exportReport();
   }
 
-  @Test(expected = IllegalArgumentException.class)
-  public void shouldThrowIllegalArgumentExceptionForUnsupportedFormat() throws Exception {
-    invokePrepareReportMethod(getParamsWithFormat("txt"));
+  @Test(expected = JasperReportViewException.class)
+  public void shouldThrowJasperReportViewExceptionForUnsupportedFormat() throws Exception {
+    viewService.getJasperReportsView(jasperTemplate, getParamsWithFormat("txt"));
     verify(jasperHtmlExporter, times(1)).exportReport();
+  }
+
+  @Test(expected = JasperReportViewException.class)
+  public void shouldThrowJasperReportViewExceptionInsteadOfNullPointerException() throws Exception {
+    whenNew(ObjectInputStream.class).withAnyArguments().thenReturn(null);
+    viewService.getJasperReportsView(jasperTemplate, getParamsWithFormat("txt"));
+  }
+
+  @Test(expected = JasperReportViewException.class)
+  public void shouldThrowJasperReportViewExceptionWhenConnectionCantBeOpen() throws Exception {
+    when(replicationDataSource.getConnection()).thenThrow(new SQLException());
+    viewService.getJasperReportsView(jasperTemplate, getParamsWithFormat("pdf"));
   }
 
   private Map<String, Object> getParamsWithFormat(String format) {
@@ -99,8 +135,10 @@ public class JasperReportsViewServiceTest {
     return params;
   }
 
-  private void invokePrepareReportMethod(Map<String, Object> params) throws Exception {
-    WhiteboxImpl.invokeMethod(viewService, "prepareReport",
-        new JasperPrint(), params);
+  private void initializeExporterMocks() throws Exception {
+    whenNew(JasperCsvExporter.class).withAnyArguments().thenReturn(jasperCsvExporter);
+    whenNew(JasperXlsExporter.class).withAnyArguments().thenReturn(jasperXlsExporter);
+    whenNew(JasperHtmlExporter.class).withAnyArguments().thenReturn(jasperHtmlExporter);
+    whenNew(JasperPdfExporter.class).withAnyArguments().thenReturn(jasperPdfExporter);
   }
 }
