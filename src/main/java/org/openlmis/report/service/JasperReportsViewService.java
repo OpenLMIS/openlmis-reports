@@ -23,7 +23,7 @@ import java.io.ObjectInputStream;
 import java.sql.Connection;
 import java.util.Map;
 import javax.sql.DataSource;
-import net.sf.jasperreports.engine.JasperExportManager;
+import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
@@ -52,19 +52,14 @@ public class JasperReportsViewService {
       Map<String, Object> params) throws JasperReportViewException {
 
     try {
-      ObjectInputStream inputStream = new ObjectInputStream(
-          new ByteArrayInputStream(jasperTemplate.getData()));
-      JasperReport jasperReport = (JasperReport) inputStream.readObject();
-
       try (Connection connection = replicationDataSource.getConnection()) {
-        JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, params, connection);
+        ObjectInputStream inputStream = new ObjectInputStream(
+            new ByteArrayInputStream(jasperTemplate.getData()));
 
-        String format = (String) params.get("format");
-        if ("pdf".equals(format)) {
-          return JasperExportManager.exportReportToPdf(jasperPrint);
-        } else {
-          return getCustomExporter(format, jasperPrint).exportReport();
-        }
+        JasperPrint jasperPrint = JasperFillManager
+            .fillReport((JasperReport) inputStream.readObject(), params, connection);
+
+        return prepareReport(jasperPrint, params);
       }
     } catch (IllegalArgumentException iae) {
       throw new JasperReportViewException(iae,
@@ -74,15 +69,23 @@ public class JasperReportsViewService {
     }
   }
 
-  private JasperExporter getCustomExporter(String format, JasperPrint jasperPrint) {
-    if ("csv".equals(format)) {
-      return new JasperCsvExporter(jasperPrint);
-    } else if ("xls".equals(format)) {
-      return new JasperXlsExporter(jasperPrint);
-    } else if ("html".equals(format)) {
-      return new JasperHtmlExporter(jasperPrint);
-    } else {
-      throw new IllegalArgumentException(format);
+  private byte[] prepareReport(JasperPrint jasperPrint, Map<String, Object> params)
+      throws JRException {
+    return getJasperExporter((String) params.get("format"), jasperPrint).exportReport();
+  }
+
+  private JasperExporter getJasperExporter(String format, JasperPrint jasperPrint) {
+    switch (format) {
+      case "pdf":
+        return new JasperPdfExporter(jasperPrint);
+      case "csv":
+        return new JasperCsvExporter(jasperPrint);
+      case "xls":
+        return new JasperXlsExporter(jasperPrint);
+      case "html":
+        return new JasperHtmlExporter(jasperPrint);
+      default:
+        throw new IllegalArgumentException(format);
     }
   }
 }
