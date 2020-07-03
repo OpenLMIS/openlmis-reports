@@ -112,18 +112,6 @@ public class JasperReportsViewServiceTest {
   }
 
   @Test(expected = JasperReportViewException.class)
-  public void shouldThrowJasperReportViewExceptionForUnsupportedFormat() throws Exception {
-    viewService.getJasperReportsView(jasperTemplate, getParamsWithFormat("txt"));
-    verify(jasperHtmlExporter, times(1)).exportReport();
-  }
-
-  @Test(expected = JasperReportViewException.class)
-  public void shouldThrowJasperReportViewExceptionInsteadOfNullPointerException() throws Exception {
-    whenNew(ObjectInputStream.class).withAnyArguments().thenReturn(null);
-    viewService.getJasperReportsView(jasperTemplate, getParamsWithFormat("txt"));
-  }
-
-  @Test(expected = JasperReportViewException.class)
   public void shouldThrowJasperReportViewExceptionWhenConnectionCantBeOpen() throws Exception {
     when(replicationDataSource.getConnection()).thenThrow(new SQLException());
     viewService.getJasperReportsView(jasperTemplate, getParamsWithFormat("pdf"));
