@@ -65,6 +65,8 @@ schemas:
           "items": { "type": "object", "$ref": "schemas/stockAdjustmentReason.json" }
       }
 
+  - visitorDtoPage: !include schemas/visitorDtoPage.json
+
 traits:
     - secured:
           queryParameters:
@@ -411,6 +413,32 @@ resourceTypes:
                           body:
                             application/json:
                                 schema: localizedMessage
+      /googleAnalytics:
+        /visitors:
+          get:
+            is: [ secured ]
+            description: Get visitor report.
+            queryParameters:
+              startDate:
+                displayName: startDate
+                type: string
+                required: true
+                repeat: false
+              endDate:
+                displayName: endDate
+                type: string
+                required: true
+                repeat: false
+            responses:
+              "200":
+                body:
+                  application/json:
+                    schema: visitorDtoPage
+              "404":
+              "403":
+                body:
+                  application/json:
+                    schema: localizedErrorResponse
 
   /settings:
       displayName: Settings.

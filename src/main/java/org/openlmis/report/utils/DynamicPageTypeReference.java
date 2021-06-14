@@ -16,6 +16,7 @@
 package org.openlmis.report.utils;
 
 import java.lang.reflect.Type;
+import org.openlmis.report.dto.PageDto;
 import org.springframework.core.ParameterizedTypeReference;
 
 /**
@@ -25,7 +26,7 @@ import org.springframework.core.ParameterizedTypeReference;
  * {@link PageImplRepresentation} objects with the provided generic type at runtime.
  */
 public class DynamicPageTypeReference<T>
-    extends BaseParameterizedTypeReference<PageImplRepresentation<T>> {
+    extends BaseParameterizedTypeReference<PageDto<T>> {
 
   /**
    * Constructs an instance that will represents {@link PageImplRepresentation} wrappers for the
@@ -40,7 +41,7 @@ public class DynamicPageTypeReference<T>
 
   @Override
   protected Type getBaseType() {
-    return PageImplRepresentation.class;
+    return PageDto.class;
   }
 
 }

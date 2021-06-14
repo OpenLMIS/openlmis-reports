@@ -13,47 +13,22 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org.
  */
 
-package org.openlmis.report.dto.external.referencedata;
+package org.openlmis.report.dto;
 
-import java.util.Set;
-import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.apache.commons.lang3.StringUtils;
+import org.openlmis.report.dto.external.referencedata.UserDto;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode
-public final class UserDto {
-  private UUID id;
+public class VisitorDto extends BaseDto {
+  private UserDto userDto;
+  private String pageView;
   private String username;
-  private String firstName;
-  private String lastName;
-  private String email;
-  private boolean verified;
-  private UUID homeFacilityId;
-  private Set<RoleAssignmentDto> roleAssignments;
-  private Boolean allowNotify;
-  private boolean active;
-
-  /**
-   * Prints the name of the user for display purposes.
-   * The format is "firstName lastName". If one of them is missing, it is
-   * omitted and the space is trimmed. If they are both missing, the
-   * user name is used.
-   * @return the name of the user for display purposes
-   */
-  public String printName() {
-    if (StringUtils.isBlank(firstName) && StringUtils.isBlank(lastName)) {
-      return username;
-    } else {
-      return StringUtils.trim(StringUtils.defaultString(firstName) + ' '
-              + StringUtils.defaultString(lastName));
-    }
-  }
 }

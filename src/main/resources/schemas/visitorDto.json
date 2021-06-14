@@ -1,0 +1,26 @@
+{
+  "type": "object",
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "title": "RequisitionDto",
+  "description": "A single requisitionDto",
+  "properties": {
+    "pageView": {
+      "type": "string",
+      "title": "pageView"
+    },
+    "username": {
+      "type": "string",
+      "title": "username"
+    },
+    "userDto": {
+      "type": "object",
+      "$ref": "userDto.json",
+      "title": "userDto"
+    }
+  },
+  "required": [
+    "pageView",
+    "username",
+    "userDto"
+  ]
+}

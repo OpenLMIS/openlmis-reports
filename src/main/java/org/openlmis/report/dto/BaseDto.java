@@ -13,27 +13,21 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org.
  */
 
-package org.openlmis.report.i18n;
+package org.openlmis.report.dto;
 
-import java.util.Arrays;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import java.util.UUID;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
-public class MessageKeys {
-  private static final String DELIMITER = ".";
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@EqualsAndHashCode
+@ToString
+public class BaseDto {
 
-  // General
-  protected static final String SERVICE = "report";
-  protected static final String SERVICE_ERROR = join(SERVICE, "error");
-
-  protected static final String NOT_FOUND = "notFound";
-
-  public static final String ERROR_MISSING_MANDATORY_FIELD = SERVICE_ERROR
-          + ".report.missingMandatoryField";
-
-  protected static String join(String... params) {
-    return String.join(DELIMITER, Arrays.asList(params));
-  }
-
-  protected MessageKeys() {
-    throw new UnsupportedOperationException();
-  }
+  @Getter
+  @Setter
+  protected UUID id;
 }

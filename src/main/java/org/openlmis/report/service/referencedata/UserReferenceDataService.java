@@ -45,6 +45,26 @@ public class UserReferenceDataService extends BaseReferenceDataService<UserDto> 
     return UserDto[].class;
   }
 
+  @Override
+  public List<UserDto> findAll() {
+    return getPage(RequestParameters.init()).getContent();
+  }
+
+  /**
+   * This method retrieves a user with given list of users by using username.
+   *
+   * @param username the username of user.
+   * @param users list of users.
+   * @return UserDto containing user's data, or null if such user was not found.
+   */
+  public UserDto getUser(String username, List<UserDto> users) {
+    return users
+            .stream()
+            .filter(item -> item.getUsername().equals(username))
+            .findFirst()
+            .orElse(null);
+  }
+
   /**
    * This method retrieves a user with given name.
    *
@@ -81,7 +101,7 @@ public class UserReferenceDataService extends BaseReferenceDataService<UserDto> 
     RequestParameters parameters = RequestParameters
         .init()
         .set("rightId", right);
-    
+
     return getResult(user + "/hasRight", parameters, Boolean.class);
   }
 

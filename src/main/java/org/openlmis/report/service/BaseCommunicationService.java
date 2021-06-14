@@ -22,11 +22,12 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import org.openlmis.report.dto.PageDto;
 import org.openlmis.report.dto.external.ResultDto;
 import org.openlmis.report.exception.DataRetrievalException;
 import org.openlmis.report.utils.DynamicPageTypeReference;
 import org.openlmis.report.utils.DynamicResultDtoTypeReference;
-import org.openlmis.report.utils.PageImplRepresentation;
 import org.openlmis.report.utils.RequestParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -177,6 +178,10 @@ public abstract class BaseCommunicationService<T> {
     }
   }
 
+  public Page<T> getPage(RequestParameters parameters) {
+    return getPage("", parameters);
+  }
+
   protected Page<T> getPage(String resourceUrl, RequestParameters parameters) {
     return getPage(resourceUrl, parameters, null, HttpMethod.GET, getResultClass());
   }
@@ -201,7 +206,7 @@ public abstract class BaseCommunicationService<T> {
         .setAll(parameters);
 
     try {
-      ResponseEntity<PageImplRepresentation<P>> response = restTemplate.exchange(
+      ResponseEntity<PageDto<P>> response = restTemplate.exchange(
               createUri(url, params),
               method,
               createEntity(authorizationService.obtainAccessToken(), payload),

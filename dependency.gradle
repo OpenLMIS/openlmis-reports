@@ -31,6 +31,8 @@ dependencies {
 
     compile "org.apache.poi:poi:3.15"
     compile "org.apache.poi:poi-ooxml:3.15"
+    compile 'com.google.apis:google-api-services-analyticsreporting:v4-rev20210106-1.31.0'
+    compile 'com.google.http-client:google-http-client-gson:1.19.0'
 
     testCompile "com.github.tomakehurst:wiremock:1.58"
     testCompile "com.jayway.restassured:rest-assured:2.7.0"
